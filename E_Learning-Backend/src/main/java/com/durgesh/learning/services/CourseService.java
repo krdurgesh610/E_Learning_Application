@@ -10,6 +10,8 @@ public interface CourseService {
 
 	List<CourseDto> getAll();
 
+	CourseDto get(String courseId);
+
 	CourseDto update(CourseDto dto, String courseId);
 
 	void delete(String courseId);

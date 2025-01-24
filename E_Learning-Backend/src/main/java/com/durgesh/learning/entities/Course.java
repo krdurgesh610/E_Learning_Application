@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
@@ -19,29 +20,31 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "courses")
 public class Course {
-	
+
 	@Id
 	private String id;
-	
+
 	private String title;
-	
+
+	@Column(name = "sortDescription")
 	private String shortDesc;
-	
+
+	@Column(name = "longDescription")
 	private String longDesc;
-	
+
 	private long price;
-	
+
 	private boolean live = false;
-	
+
 	private double discount;
-	
+
 	private Date createdDate;
-	
+
 	private String banner;
-	
+
 	@OneToMany(mappedBy = "course")
 	private List<Video> videos = new ArrayList<>();
-	
+
 	@ManyToMany
 	private List<Category> categoryList = new ArrayList<>();
 
