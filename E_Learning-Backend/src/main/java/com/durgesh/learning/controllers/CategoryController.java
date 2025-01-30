@@ -1,5 +1,7 @@
 package com.durgesh.learning.controllers;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.durgesh.learning.config.AppConstants;
 import com.durgesh.learning.dtos.CategoryDto;
+import com.durgesh.learning.dtos.CourseDto;
 import com.durgesh.learning.dtos.CustomMessage;
 import com.durgesh.learning.dtos.CustomPageResponse;
 import com.durgesh.learning.services.CategoryService;
@@ -65,6 +68,23 @@ public class CategoryController {
 	public CategoryDto update(@PathVariable String categoryId, @RequestBody CategoryDto categoryDto) {
 		CategoryDto update = categoryService.update(categoryDto, categoryId);
 		return update;
+	}
+
+	@PostMapping("/{categoryId}/courses/{courseId}")
+	public ResponseEntity<CustomMessage> addCourseToCategory(@PathVariable String categoryId,
+			@PathVariable String courseId) {
+
+		categoryService.addCourseToCategory(categoryId, courseId);
+		CustomMessage customMessage = new CustomMessage();
+		customMessage.setMessage("Category Updated !!");
+		customMessage.setSuccess(true);
+		return ResponseEntity.status(HttpStatus.OK).body(customMessage);
+	}
+
+	@GetMapping("/{categoryId}/courses")
+	public ResponseEntity<List<CourseDto>> getCoursesOfCategory(@PathVariable String categoryId) {
+		List<CourseDto> coursesOfCategory = categoryService.getCoursesOfCategory(categoryId);
+		return ResponseEntity.status(HttpStatus.OK).body(coursesOfCategory);
 	}
 
 }

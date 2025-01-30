@@ -3,7 +3,6 @@ package com.durgesh.learning.entities;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -47,5 +46,15 @@ public class Course {
 
 	@ManyToMany
 	private List<Category> categoryList = new ArrayList<>();
+
+	public void addCategory(Category category) {
+		categoryList.add(category);
+		category.getCourses().add(this);
+	}
+
+	public void removeCategory(Category category) {
+		categoryList.remove(category);
+		category.getCourses().remove(this);
+	}
 
 }

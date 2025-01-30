@@ -3,8 +3,12 @@ package com.durgesh.learning.services;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.durgesh.learning.dtos.CourseDto;
@@ -39,12 +43,12 @@ public class CourseServiceImpl implements CourseService {
 
 	}
 
-	@Override
-	public List<CourseDto> getAll() {
-		List<Course> list = courseRepo.findAll();
-		List<CourseDto> courseDtos = list.stream().map(course -> modelMapper.map(course, CourseDto.class)).toList();
-		return courseDtos;
-	}
+//	@Override
+//	public List<CourseDto> getAll() {
+//		List<Course> list = courseRepo.findAll();
+//		List<CourseDto> courseDtos = list.stream().map(course -> modelMapper.map(course, CourseDto.class)).toList();
+//		return courseDtos;
+//	}
 
 	@Override
 	public CourseDto get(String courseId) {
@@ -62,21 +66,38 @@ public class CourseServiceImpl implements CourseService {
 	public CourseDto update(CourseDto dto, String courseId) {
 		Course course = courseRepo.findById(courseId)
 				.orElseThrow(() -> new ResourceNotFoundException("Course Not Found !!"));
-		course.setBanner(dto.getBanner());
-		course.setDiscount(dto.getDiscount());
-		course.setLongDesc(dto.getLongDesc());
-		course.setShortDesc(dto.getShortDesc());
-		course.setPrice(dto.getPrice());
-		course.setTitle(dto.getTitle());
-		Course savedCourse = courseRepo.save(course);
-		return modelMapper.map(savedCourse, CourseDto.class);
+
+		modelMapper.map(dto, course);
+		Course updateCourse = courseRepo.save(course);
+		return modelMapper.map(updateCourse, CourseDto.class);
+
+// Ye me bnaya tha sir ka trika alag h uper !!
+
+//		course.setBanner(dto.getBanner());
+//		course.setDiscount(dto.getDiscount());
+//		course.setLongDesc(dto.getLongDesc());
+//		course.setShortDesc(dto.getShortDesc());
+//		course.setPrice(dto.getPrice());
+//		course.setTitle(dto.getTitle());
+//		Course savedCourse = courseRepo.save(course);
+//		return modelMapper.map(savedCourse, CourseDto.class);
 	}
 
 	@Override
-	public List<CourseDto> searchByTitle(String titleKeyword) {
-//		List<Course> listCourses = courseRepo.findById(titleKeyword)
-//				.orElseThrow(() -> new ResourceNotFoundException("Course Not Found !!"));
-		return null;
+	public List<CourseDto> searchCourse(String Keyword) {
+		List<Course> courses = courseRepo.findByTitleContainingIgnoreCaseOrShortDescContainingIgnoreCase(Keyword,
+				Keyword);
+		return courses.stream().map(course -> modelMapper.map(course, CourseDto.class)).collect(Collectors.toList());
+	}
+
+// getAllCourse me Custom Page SpringBoot me predefined h esiliye custom page use nhi kiye , mn ho to kr skte h 
+
+	@Override
+	public Page<CourseDto> getAllCourse(Pageable pageable) {
+		Page<Course> courses = courseRepo.findAll(pageable);
+		List<CourseDto> dtos = courses.getContent().stream().map(course -> modelMapper.map(course, CourseDto.class))
+				.collect(Collectors.toList());
+		return new PageImpl<>(dtos, pageable, courses.getTotalElements());
 	}
 
 //	@Override

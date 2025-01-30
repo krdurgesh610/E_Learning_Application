@@ -9,23 +9,30 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.durgesh.learning.dtos.CategoryDto;
+import com.durgesh.learning.dtos.CourseDto;
 import com.durgesh.learning.dtos.CustomPageResponse;
 import com.durgesh.learning.entities.Category;
+import com.durgesh.learning.entities.Course;
 import com.durgesh.learning.exceptions.ResourceNotFoundException;
 import com.durgesh.learning.repositories.CategoryRepo;
+import com.durgesh.learning.repositories.CourseRepo;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
 	private CategoryRepo categoryRepo;
 
+	private CourseRepo courseRepo;
+
 	private ModelMapper modelMapper;
 
-	public CategoryServiceImpl(CategoryRepo categoryRepo, ModelMapper modelMapper) {
+	public CategoryServiceImpl(CategoryRepo categoryRepo, CourseRepo courseRepo, ModelMapper modelMapper) {
 		super();
 		this.categoryRepo = categoryRepo;
+		this.courseRepo = courseRepo;
 		this.modelMapper = modelMapper;
 	}
 
@@ -84,6 +91,34 @@ public class CategoryServiceImpl implements CategoryService {
 		category.setAddedDate(new Date());
 		Category savedCategory = categoryRepo.save(category);
 		return modelMapper.map(savedCategory, CategoryDto.class);
+	}
+
+	@Override
+	@Transactional
+	public void addCourseToCategory(String catId, String courseId) {
+		// get Category
+		Category category = categoryRepo.findById(catId)
+				.orElseThrow(() -> new ResourceNotFoundException("Category Not Found !!"));
+		// get Course
+		Course course = courseRepo.findById(courseId)
+				.orElseThrow(() -> new ResourceNotFoundException("Course Not Found !!"));
+
+		// Course k under category list add ho gyi
+		// category k under jo course ushme course add ho gyi
+		category.addCourses(course);
+
+		categoryRepo.save(category);
+
+		System.out.println("Category relationship updated !!");
+	}
+
+	@Override
+	@Transactional
+	public List<CourseDto> getCoursesOfCategory(String categoryId) {
+		Category category = categoryRepo.findById(categoryId)
+				.orElseThrow(() -> new ResourceNotFoundException("Category Not Found !!"));
+		List<Course> courses = category.getCourses();
+		return courses.stream().map(course -> modelMapper.map(course, CourseDto.class)).toList();
 	}
 
 }
